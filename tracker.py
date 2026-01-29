@@ -1,3 +1,30 @@
+import os
+import requests
+import sys
+
+GOLD_API_KEY = os.getenv("GOLD_API_KEY")
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+CHAT_ID = os.getenv("CHAT_ID")
+
+if not all([GOLD_API_KEY, TELEGRAM_TOKEN, CHAT_ID]):
+    print("Missing environment variables")
+    sys.exit(0)
+
+GOLD_URL = "https://www.goldapi.io/api/XAU/INR"
+HEADERS = {
+    "x-access-token": GOLD_API_KEY,
+    "Content-Type": "application/json"
+}
+
+def get_gold_price():
+    r = requests.get(GOLD_URL, headers=HEADERS, timeout=15)
+    data = r.json()
+    price = data.get("price")
+    if price is None:
+        print("API response:", data)
+        sys.exit(0)
+    return price
+
 def send_telegram(message):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
     payload = {
@@ -7,3 +34,6 @@ def send_telegram(message):
     r = requests.post(url, json=payload, timeout=15)
     print("Telegram status:", r.status_code)
     print("Telegram response:", r.text)
+
+price = get_gold_price()
+send_telegram(f"Gold price (INR per ounce): ₹{price}")
