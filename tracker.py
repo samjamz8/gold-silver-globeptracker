@@ -1,28 +1,42 @@
-import requests
 import os
+import requests
+import sys
 
-GOLD_API_KEY = os.getenv("goldapi-3ckgqsmkzisjgv-io")
-TELEGRAM_TOKEN = os.getenv("8345977870:AAGOh5PRosI_HtgeFLX5nv4zFaKm6GaVQKk")
-CHAT_ID = os.getenv("947264440")
+GOLD_API_KEY = os.getenv("GOLD_API_KEY")
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+CHAT_ID = os.getenv("CHAT_ID")
 
-GOLD_URL = "https://www.goldapi.io/api/XAU/USD"
-SILVER_URL = "https://www.goldapi.io/api/XAG/USD"
+if not all([GOLD_API_KEY, TELEGRAM_TOKEN, CHAT_ID]):
+    print("Missing environment variables")
+    sys.exit(0)
 
+GOLD_URL = "https://www.goldapi.io/api/XAU/INR"
 HEADERS = {
     "x-access-token": GOLD_API_KEY,
     "Content-Type": "application/json"
 }
 
+def get_gold_price():
+    r = requests.get(GOLD_URL, headers=HEADERS, timeout=15)
+    data = r.json()
+    price = data.get("price")
+
+    if price is None:
+        print("API response:", data)
+        sys.exit(0)
+
+    return price
+
 def send_telegram(message):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-    requests.post(url, data={"chat_id": CHAT_ID, "text": message})
+    payload = {"chat_id": CHAT_ID, "text": message}
+    requests.post(url, json=payload, timeout=10)
 
-def get_price(url):
-    response = requests.get(url, headers=HEADERS)
-    data = response.json()
-    return data["price"]
+try:
+    price = get_gold_price()
+    send_telegram(f"🟡 Gold Price (INR): ₹{price}")
+    print("Success")
 
-gold_price = get_price(GOLD_URL)
-silver_price = get_price(SILVER_URL)
-
-send_telegram(f"📊 Gold: ${gold_price}\nSilver: ${silver_price}")
+except Exception as e:
+    print("Handled error:", e)
+    sys.exit(0)
