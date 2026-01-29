@@ -2,7 +2,7 @@ name: Gold Silver Tracker
 
 on:
   schedule:
-    - cron: "*/10 * * * *"   # every 10 minutes
+    - cron: "*/10 * * * *"
   workflow_dispatch:
 
 jobs:
@@ -23,7 +23,7 @@ jobs:
 
       - name: Run tracker
         env:
-          GOLD_API_KEY: ${{ secrets.GOLD_API_KEY }}
-          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
-          CHAT_ID: ${{ secrets.CHAT_ID }}
+          GOLD_API_KEY: ${{ goldapi-3ckgqsmkzisjgv-io }}
+          TELEGRAM_TOKEN: ${{ 8345977870:AAGOh5PRosI_HtgeFLX5nv4zFaKm6GaVQKk }}
+          CHAT_ID: ${{ 947264440 }}
         run: python tracker.py
